@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Caída de Tensión</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(135deg, #4a69bd 0%, #6c5ce7 100%);
+        }
+        
+        .card {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .input {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .button {
+            transition: background-color 0.3s ease;
+        }
+        
+        .button:hover {
+            background-color: rgba(66, 153, 225, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient text-white py-8">
+    <div class="container mx-auto px-4">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
+                CONSULTORIA EN INGENIERIA Y EFICIENCIA ENERGETICA
+            </h1>
+            <div class="flex justify-center items-center">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Fotografia%20Minor-4051DQMxdMZeQa4dPSd6soUkfPNPag.png" alt="Consultor de Ingeniería" class="w-20 h-20 rounded-full object-cover">
+            </div>
+        </header>
+
+        <div class="w-full max-w-2xl mx-auto">
+            <div class="card rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-center text-white">Calculadora de Caída de Tensión</h2>
+                <p class="text-gray-100 mb-6 text-center">Ingrese los datos del circuito y presione el botón Calcular para obtener los resultados.</p>
+                <form id="calculadoraForm" class="space-y-4">
+                    <div>
+                        <label for="voltaje" class="block text-sm font-medium text-gray-100">Voltaje de alimentación (V)</label>
+                        <input type="number" id="voltaje" required class="mt-1 block w-full px-3 py-2 bg-white/30 border border-transparent rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="calibre" class="block text-sm font-medium text-gray-100">Calibre del conductor (AWG)</label>
+                        <input type="text" id="calibre" required class="mt-1 block w-full px-3 py-2 bg-white/30 border border-transparent rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="distancia" class="block text-sm font-medium text-gray-100">Distancia del circuito (m)</label>
+                        <input type="number" id="distancia" required class="mt-1 block w-full px-3 py-2 bg-white/30 border border-transparent rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="potencia" class="block text-sm font-medium text-gray-100">Potencia conectada (W)</label>
+                        <input type="number" id="potencia" required class="mt-1 block w-full px-3 py-2 bg-white/30 border border-transparent rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400">
+                            Calcular
+                        </button>
+                        <button type="button" id="reiniciar" class="flex-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-800 bg-blue-200 hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400">
+                            Reiniciar
+                        </button>
+                    </div>
+                </form>
+                <div id="resultado" class="mt-6 p-4 bg-white/20 rounded-md hidden">
+                    <!-- Los resultados se insertarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const conductorData = [
+            { calibre: "14", seccion: 2.08, diametro: 1.63 },
+            { calibre: "12", seccion: 3.31, diametro: 2.05 },
+            { calibre: "10", seccion: 5.26, diametro: 2.59 },
+            { calibre: "8", seccion: 8.37, diametro: 3.26 },
+            { calibre: "6", seccion: 13.3, diametro: 4.11 },
+            { calibre: "4", seccion: 21.2, diametro: 5.19 },
+            { calibre: "2", seccion: 33.6, diametro: 6.54 },
+            { calibre: "1/0", seccion: 53.5, diametro: 8.25 },
+            { calibre: "2/0", seccion: 67.4, diametro: 9.27 },
+            { calibre: "3/0", seccion: 85.0, diametro: 10.4 },
+            { calibre: "4/0", seccion: 107, diametro: 11.7 },
+        ];
+
+        document.getElementById('calculadoraForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const voltaje = parseFloat(document.getElementById('voltaje').value);
+            const calibre = document.getElementById('calibre').value;
+            const distancia = parseFloat(document.getElementById('distancia').value);
+            const potencia = parseFloat(document.getElementById('potencia').value);
+
+            const infoConductor = conductorData.find(c => c.calibre === calibre);
+
+            if (infoConductor) {
+                const seccion = infoConductor.seccion;
+                const resistividad = 0.0172; // Ω·mm²/m para el cobre
+                const intensidad = potencia / voltaje;
+                const caidaTension = (2 * resistividad * distancia * intensidad) / seccion;
+                const porcentajeCaida = (caidaTension / voltaje) * 100;
+
+                const resultadoHTML = `
+                    <h3 class="text-lg font-semibold mb-2 text-white">Resultados:</h3>
+                    <p class="text-gray-100">Caída de tensión: ${caidaTension.toFixed(2)} V</p>
+                    <p class="text-gray-100">Porcentaje de caída: ${porcentajeCaida.toFixed(2)}%</p>
+                    <h4 class="text-md font-semibold mt-4 mb-2 text-white">Información del conductor:</h4>
+                    <p class="text-gray-100">Calibre: ${infoConductor.calibre}</p>
+                    <p class="text-gray-100">Sección: ${infoConductor.seccion} mm²</p>
+                    <p class="text-gray-100">Diámetro: ${infoConductor.diametro} mm</p>
+                `;
+
+                document.getElementById('resultado').innerHTML = resultadoHTML;
+                document.getElementById('resultado').classList.remove('hidden');
+            } else {
+                document.getElementById('resultado').innerHTML = '<p class="text-red-300">Error: No se encontró información para el calibre especificado</p>';
+                document.getElementById('resultado').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('reiniciar').addEventListener('click', function() {
+            document.getElementById('calculadoraForm').reset();
+            document.getElementById('resultado').innerHTML = '';
+            document.getElementById('resultado').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
